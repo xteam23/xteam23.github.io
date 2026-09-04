@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>obsidian(1) — CLI Minecraft Launcher for Linux</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,800;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090a0f;
+            --term-bg: #0d0e15;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-green: #10b981;
+            --accent-purple: #a855f7;
+            --accent-cyan: #06b6d4;
+            --text-main: #e2e8f0;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 0;
+        }
+
+        /* Top Bar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 60px;
+        }
+
+        .brand {
+            font-weight: 800;
+            color: var(--accent-purple);
+            font-size: 1.2rem;
+        }
+
+        .version {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Hero */
+        .hero {
+            margin-bottom: 50px;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            font-weight: 800;
+        }
+
+        .hero h1 span.green { color: var(--accent-green); }
+        .hero h1 span.purple { color: var(--accent-purple); }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 650px;
+            margin-bottom: 30px;
+        }
+
+        /* One-Line Installer Box */
+        .install-box {
+            background: var(--term-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 50px;
+        }
+
+        .command {
+            color: var(--accent-green);
+            font-size: 0.95rem;
+        }
+
+        .command span.prompt { color: var(--text-muted); }
+        .command span.cmd { color: var(--text-main); }
+
+        /* Terminal Window */
+        .terminal {
+            background: var(--term-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(168, 85, 247, 0.05);
+            margin-bottom: 60px;
+        }
+
+        .terminal-header {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ef4444; }
+        .dot.yellow { background: #f59e0b; }
+        .dot.green { background: #10b981; }
+
+        .term-title {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+
+        .terminal-body {
+            padding: 24px;
+            font-size: 0.9rem;
+            color: #d1d5db;
+            overflow-x: auto;
+        }
+
+        .ascii-art {
+            color: var(--accent-purple);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            white-space: pre;
+        }
+
+        .log-line { margin-bottom: 6px; }
+        .log-info { color: var(--accent-cyan); }
+        .log-success { color: var(--accent-green); }
+
+        /* Quick Syntax / Commands Grid */
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: ">";
+            color: var(--accent-green);
+        }
+
+        .cmd-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 60px;
+        }
+
+        .cmd-card {
+            background: var(--term-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .cmd-card code {
+            color: var(--accent-green);
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .cmd-card p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 30px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-purple);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <nav>
+            <div class="brand">$ obsidian --cli</div>
+            <div class="version">v0.4.1-alpha (x86_64-linux)</div>
+        </nav>
+
+        <section class="hero">
+            <h1>Zero GUI.<br>Pure <span class="purple">Obsidian</span> <span class="green">Performance.</span></h1>
+            <p>A keyboard-first, lightweight command-line Minecraft client. Manage instances, install Modrinth modpacks, and launch the game straight from your shell.</p>
+
+            <div class="install-box">
+                <div class="command">
+                    <span class="prompt">$</span> <span class="cmd">curl -sSL https://obsidian-cli.org/install.sh | sh</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Terminal Window Mockup -->
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+                <div class="term-title">user@archlinux: ~ (obsidian)</div>
+            </div>
+            <div class="terminal-body">
+                <div class="ascii-art">
+  ____  ____   _____ _____ _____  _____          _   _ 
+ / __ \|  _ \ / ____|_   _|  __ \|_   _|   /\   | \ | |
+| |  | | |_) | (___   | | | |  | | | |    /  \  |  \| |
+| |  | |  _ < \___ \  | | | |  | | | |   / /\ \ | . ` |
+| |__| | |_) |____) |_| |_| |__| |_| |_ / ____ \| |\  |
+ \____/|____/|_____/|_____|_____/|_____/_/    \_\_| \_|
+                </div>
+                <div class="log-line"><span class="prompt">$</span> obsidian launch fabric-1.20.4 --render-distance 16</div>
+                <div class="log-line"><span class="log-info">[INFO]</span> Authenticating via Microsoft OAuth... <span class="log-success">OK</span></div>
+                <div class="log-line"><span class="log-info">[INFO]</span> Verifying asset hashes (1284 files)... <span class="log-success">OK</span></div>
+                <div class="log-line"><span class="log-info">[INFO]</span> Loading Java 17.0.8 (G1GC optimized)...</div>
+                <div class="log-line"><span class="log-success">[SUCCESS]</span> Minecraft launched in 1.42s (PID: 8842)</div>
+            </div>
+        </div>
+
+        <!-- CLI Usage Breakdown -->
+        <div class="section-title">Core Syntax</div>
+        <div class="cmd-grid">
+            <div class="cmd-card">
+                <code>obsidian run [instance]</code>
+                <p>Launches a specified game instance headlessly or with native X11/Wayland context.</p>
+            </div>
+            <div class="cmd-card">
+                <code>obsidian mod install [id]</code>
+                <p>Fetches and resolves dependencies directly from Modrinth & CurseForge API.</p>
+            </div>
+            <div class="cmd-card">
+                <code>obsidian auth login</code>
+                <p>Executes device-code OAuth flow directly inside the terminal window.</p>
+            </div>
+            <div class="cmd-card">
+                <code>obsidian profiles list</code>
+                <p>Outputs all local game configurations, memory limits, and target Java flags.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Source available on <a href="#">GitHub</a> | AUR Package: <a href="#">obsidian-mc-bin</a></p>
+        </footer>
+    </div>
+
+</body>
+</html>
